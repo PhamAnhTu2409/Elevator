@@ -148,6 +148,11 @@ var createWorldCreator = function() {
         world.avgWaitTime = 0.0;
         world.challengeEnded = false;
         world.testcase = 2;
+        // 1 - After 20:30, 50% floor 1, 50% others
+        // 2 - Random all
+        // 3 - At 8:45, 90% go down
+        // 4 - Special event, 100% go up
+        // 5 - Special event, 100% go down
 
         var recalculateStats = function() {
             world.transportedPerSec = world.transportedCounter / world.elapsedTime;
