@@ -47,19 +47,76 @@ var createWorldCreator = function() {
         }
         var user = creator.createRandomUser();
         user.moveTo(105+_.random(40), 0);
-        var currentFloor = _.random(1) === 0 ? 0 : _.random(floorCount - 1);
-        //var currentFloor = _.random(0, floorCount - 1);
-        var destinationFloor;
-        if(currentFloor === 0) {
-            // Definitely going up
-            destinationFloor = _.random(1, floorCount - 1);
-        } else {
-            // Usually going down, but sometimes not
-            if(_.random(10) === 0) {
-                destinationFloor = (currentFloor + _.random(1, floorCount - 1)) % floorCount;
+
+
+        //50% tầng 1, 50% còn lại - sau 20h30
+        if (world.testcase === 1) {
+            var currentFloor = _.random(1) === 0 ? 0 : _.random(floorCount - 1); 
+            var destinationFloor;
+            if(currentFloor === 0) {
+                // Definitely going up
+                destinationFloor = _.random(1, floorCount - 1);
             } else {
-                destinationFloor = 0;
+                // Usually going down, but sometimes not
+                if(_.random(10) === 0) {
+                    destinationFloor = (currentFloor + _.random(1, floorCount - 1)) % floorCount;
+                } else {
+                    destinationFloor = 0;
+                }
+        }
+        }
+
+        // Ngẫu nhiên tại các tầng
+        if (world.testcase === 2) {
+            var currentFloor = _.random(0, floorCount - 1); 
+            var destinationFloor;
+            if(currentFloor === 0) {
+                // Definitely going up
+                destinationFloor = _.random(1, floorCount - 1);
+            } else {
+                // Usually going down, but sometimes not
+                if(_.random(10) === 0) {
+                    destinationFloor = (currentFloor + _.random(1, floorCount - 1)) % floorCount;
+                } else {
+                    destinationFloor = 0;
+                }
             }
+        }
+        //8h45 - 90% đi xuống
+        if (world.testcase === 3) {
+            var currentFloor;
+            if (_.random(1, true) <= 0.1) {
+                currentFloor = _.random(1) === 0 ? 0 : _.random(2); // 10%  
+            } else {
+                if(_.random(1, true) <= 0.3) {
+                    currentFloor = _.random(12, floorCount - 1); // 30% 
+                } else {
+                    currentFloor = _.random(3,11); // 60%
+                }
+            }
+            var destinationFloor;
+                if(currentFloor === 0) {
+                    // Definitely going up
+                    destinationFloor = _.random(1, floorCount - 1);
+                } else {
+                    // Usually going down, but sometimes not
+                    if(_.random(1, true) <= 0.05) {
+                        destinationFloor = (currentFloor + _.random(1, floorCount - 1)) % floorCount;
+                    } else {
+                        destinationFloor = 0;
+                    }
+                }
+        }
+
+        //Báo cháy1
+        if (world.testcase === 4) {
+            var currentFloor = _.random(1, floorCount - 1); 
+            var destinationFloor = 0;
+        }
+        //Báo cháy 2
+        if (world.testcase === 5) {
+            var currentFloor = 0; 
+            var destinationFloor = _.random(1, floorCount - 1);
         }
         user.appearOnFloor(floors[currentFloor], destinationFloor);
         world.spawnedUserCount++;
@@ -90,6 +147,7 @@ var createWorldCreator = function() {
         world.maxWaitTime = 0.0;
         world.avgWaitTime = 0.0;
         world.challengeEnded = false;
+        world.testcase = 2;
 
         var recalculateStats = function() {
             world.transportedPerSec = world.transportedCounter / world.elapsedTime;
