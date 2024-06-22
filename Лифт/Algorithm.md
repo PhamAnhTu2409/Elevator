@@ -40,7 +40,7 @@
 }
 ```
 ## Code 2
-```
+```javascript
 {
     init: function(elevators, floors) {
         for (var i=0;i<floors.length;i++){
@@ -100,7 +100,7 @@
 }
 ```
 ## Code 3
-```
+```javascript
 {
     init: function(elevators, floors) {
 
@@ -272,7 +272,7 @@
 }
 ```
 ## Code 4
-```
+```javascript
 {
     init: function(elevators, floors) {
         var top = floors.length - 1;
