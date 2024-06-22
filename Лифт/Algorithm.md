@@ -1,4 +1,5 @@
 ## LOOK
+```javascript
 {
     init: function(elevators, floors) {
         elevators.forEach(function(e) {    
@@ -37,3 +38,4 @@
     },
     update: function(dt, elevators, floors) { }
 }
+```
