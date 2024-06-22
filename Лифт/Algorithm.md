@@ -1,4 +1,4 @@
-## LOOK + CLosest Cabin
+## FCFS + SSTF
 ```javascript
 {
     init: function(elevators, floors) {
@@ -39,7 +39,7 @@
     update: function(dt, elevators, floors) { }
 }
 ```
-## Code 2
+## LOOK + 70%
 ```javascript
 {
     init: function(elevators, floors) {
