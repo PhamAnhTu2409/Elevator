@@ -108,7 +108,7 @@ var createWorldCreator = function() {
                 }
         }
 
-        //Báo cháy1
+        //Báo cháy 1
         if (world.testcase === 4) {
             var currentFloor = _.random(1, floorCount - 1); 
             var destinationFloor = 0;
@@ -151,8 +151,8 @@ var createWorldCreator = function() {
         // 1 - After 20:30, 50% floor 1, 50% others
         // 2 - Random all
         // 3 - At 8:45, 90% go down
-        // 4 - Special event, 100% go up
-        // 5 - Special event, 100% go down
+        // 4 - Special event, 100% go down
+        // 5 - Special event, 100% go up
 
         var recalculateStats = function() {
             world.transportedPerSec = world.transportedCounter / world.elapsedTime;
