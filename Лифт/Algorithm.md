@@ -104,22 +104,14 @@
 {
     init: function(elevators, floors) {
 
-        // set to true to optimize algorithm for moves
-        var optimizeMoves = false;
-        // set to true to optimize algorithm for wait
-        var optimizeWait = false;
-
         // check floors & elevators for events
-        map(floors, checkForButtonPress);
-        map(elevators, checkFloorButton);
-        map(elevators, checkPassingFloor);
-        if (!optimizeMoves && !optimizeWait) {
-            map(elevators, checkForIdle);
-        }
+        floors.forEach(checkForButtonPress);
+        elevators.forEach(checkFloorButton);
+        elevators.forEach(checkPassingFloor);
+        elevators.forEach(checkForIdle);
 
         // button pressed at floor
         function checkForButtonPress(floor) {
-            // for now we don't differentiate between up and down passengers
             floor.on("up_button_pressed down_button_pressed", function() {
                 assignElevator(floor);
             });
@@ -127,143 +119,110 @@
 
         // button pressed inside elevator
         function checkFloorButton(elevator) {
-            elevator.on("floor_button_pressed", function (floorNum) {
-                if (elevator.destinationQueue.indexOf(floorNum) === -1) {
-                    // go to floor if we're not already headed there
+            elevator.on("floor_button_pressed", function(floorNum) {
+                if (!elevator.destinationQueue.includes(floorNum)) {
                     elevator.goToFloor(floorNum);
                 }
             });
         }
 
-        // if passing floor in destination queue, lets
-        // stop there, then be on our way
+        // if passing floor in destination queue, stop there, then be on our way
         function checkPassingFloor(elevator) {
-            elevator.on("passing_floor", function (floorNum, direction) {
-                var queue = elevator.destinationQueue;
-                var index = queue.indexOf(floorNum);
-                if (index > -1) {
-                    var floor = floors[floorNum];
-                    var goingUp = floor.buttonStates.up === 'activated';
-                    var goingDown = floor.buttonStates.down === 'activated';
-                    var passengerOnFloor = goingUp || goingDown;
-                    var floorInRequests = elevator.getPressedFloors().indexOf(floorNum) > -1;
-                    // remove the floor as we decide what to do with it
-                    queue.splice(index, 1);
+            elevator.on("passing_floor", function(floorNum, direction) {
+                let queue = elevator.destinationQueue;
+                if (queue.includes(floorNum)) {
+                    let floor = floors[floorNum];
+                    let goingUp = floor.buttonStates.up === 'activated';
+                    let goingDown = floor.buttonStates.down === 'activated';
+                    let passengerOnFloor = goingUp || goingDown;
+                    let floorInRequests = elevator.getPressedFloors().includes(floorNum);
+                    queue.splice(queue.indexOf(floorNum), 1);
                     elevator.checkDestinationQueue();
-                    // passenger has requested this floor, so stop
-                    if (floorInRequests) {
+                    if (floorInRequests || (passengerOnFloor && elevator.loadFactor() < 0.7)) {
                         elevator.goToFloor(floorNum, true);
                     } else if (passengerOnFloor) {
-                        // passenger is waiting at this floor,
-                        // decide to stop or not
-                        if (elevator.loadFactor() < .7) {
-                            // our elevator is not too crowded, so lets stop
-                            elevator.goToFloor(floorNum, true);
-                        } else {
-                            // too crowded now
-                            if (optimizeMoves) {
-                                // add it back to our queue for later
-                                elevator.goToFloor(floorNum);
-                            } else {
-                                // give it to another elevator
-                                assignElevator(floor);
-                            }
-                        }
+                        assignElevator(floor);
                     }
-                    // floor was not in requests, and passenger was
-                    // not on floor, so we dont do anything with the
-                    // floor number, just leave it removed
                 }
             });
         }
 
         // if idle, send back to ground floor
         function checkForIdle(elevator) {
-            elevator.on("idle", function () {
-                elevator.goToFloor(0);
+            elevator.on("idle", function() {
+                if (elevator.currentFloor() !== 0) {
+                    elevator.goToFloor(0);
+                } else {
+                    handleIdleElevator(elevator);
+                }
             });
         }
 
         // determine best elevator to send
         // based on suitability score
         function assignElevator(floor) {
-            var floorNo = floor.floorNum();
-            var elevatorScores = map(elevators, scoreElevators);
-            var bestScore = reduce(elevatorScores, findBest, null);
-            var elevator = bestScore[0];
+            let floorNo = floor.floorNum();
+            let closestElevator = null;
+            let minDistance = Infinity;
 
-            elevator.goToFloor(floorNo);
-
-            function findBest(current, elevatorScore) {
-                // lower ranking is better
-                if (current === null) {
-                    return elevatorScore;
-                } else if (elevatorScore[1] < current[1]) {
-                    return elevatorScore;
-                } else {
-                    return current;
-                }
-            }
-
-            function scoreElevators(elevator) {
-                var score;
-                var queue = elevator.destinationQueue;
-                var distanceFromFloor = getDistance();
-                var load = elevator.loadFactor();
-
-                score = distanceFromFloor;
-                // apply load factor to score
-                if (optimizeMoves) {
-                    // if move optimization is enabled,
-                    // then we favor fuller elevators
-                    score -= (queue.length * (1 + load));
-                } else if (optimizeWait) {
-                    score += (queue.length * (1 + load));
-                } else {
-                    // otherwise favor lighter elevators
-                    score += (queue.length * (1 + load));
-                }
-
-                return [elevator, score];
-
-                function getDistance() {
-                    if (queue.length === 0) {
-                        // no destinations scheduled
-                        // so lets use current floor
-                        return Math.abs(elevator.currentFloor() - floorNo);
+            elevators.forEach(elevator => {
+                if (elevator.loadFactor() < 1) {
+                    let distance = calculateDistance(elevator, floorNo);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestElevator = elevator;
                     }
-                    // search destination queue
-                    // for a stop close to floorNo
-                    return reduce(queue, function (current, scheduledLocation) {
-                        var distance = Math.abs(scheduledLocation - floorNo);
-                        if (current === null) {
-                            return distance;
-                        } else if (distance < current) {
-                            return distance;
-                        } else {
-                            return current;
-                        }
-                    }, null);
+                }
+            });
+
+            if (closestElevator) {
+                closestElevator.goToFloor(floorNo);
+            }
+
+            function calculateDistance(elevator, targetFloor) {
+                let currentFloor = elevator.currentFloor();
+                if (elevator.destinationQueue.length === 0) {
+                    return Math.abs(currentFloor - targetFloor);
+                }
+
+                let queue = elevator.destinationQueue.slice();
+                queue.push(targetFloor);
+                queue.sort((a, b) => a - b);
+
+                if (elevator.goingUpIndicator()) {
+                    if (targetFloor >= currentFloor) {
+                        return targetFloor - currentFloor;
+                    } else {
+                        return (floors.length - currentFloor) + targetFloor;
+                    }
+                } else {
+                    if (targetFloor <= currentFloor) {
+                        return currentFloor - targetFloor;
+                    } else {
+                        return currentFloor + (floors.length - targetFloor);
+                    }
                 }
             }
         }
 
-        //functional array helpers
-
-        function map(array, func) {
-            var mapped = [];
-            array.forEach(function (element) {
-                mapped.push(func(element));
+        // handle idle elevator, move it to serve requests in C-SCAN manner
+        function handleIdleElevator(elevator) {
+            let floorsToVisit = [];
+            floors.forEach(floor => {
+                if (floor.buttonStates.up === 'activated' || floor.buttonStates.down === 'activated') {
+                    floorsToVisit.push(floor.floorNum());
+                }
             });
-            return mapped;
-        }
 
-        function reduce(array, combine, start) {
-            var current = start;
-            map(array, function (element) {
-                current = combine(current, element);
-            });
-            return current;
+            if (floorsToVisit.length > 0) {
+                floorsToVisit.sort((a, b) => a - b);
+                if (elevator.goingUpIndicator()) {
+                    elevator.destinationQueue = floorsToVisit;
+                } else {
+                    elevator.destinationQueue = floorsToVisit.reverse();
+                }
+                elevator.checkDestinationQueue();
+            }
         }
     },
     update: function(dt, elevators, floors) {
