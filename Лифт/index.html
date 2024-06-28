@@ -37,7 +37,7 @@
 
     <script type="text/template" id="floor-template">
         <div class="floor" style="top: {yPosition}px">
-            <span class="floornumber">{level}</span>
+            <span class="floornumber">{levelplus}</span>
             <span class="buttonindicator">
                 <i class="fa fa-arrow-circle-up up"></i>
                 <i class="fa fa-arrow-circle-down down"></i>
@@ -55,7 +55,7 @@
     </script>
 
     <script type="text/template" id="elevatorbutton-template">
-        <span class="buttonpress">{floorNum}</span>
+        <span class="buttonpress">{floorNum}&nbsp</span>
     </script>
 
     <script type="text/template" id="feedback-template">
@@ -68,16 +68,18 @@
 
     <script type="text/template" id="challenge-template">
         <div class="left">
-            <h3>{challenge.condition.description}</h3>
+            
+            <h1>{challenge.condition.description}</h1>
         </div>
-        <button class="right startstop unselectable" style="width: 110px">{startButtonText}</button>
+        
+        <button class="right startstop unselectable" style="width: 110px ;margin-top:50px;">{startButtonText}</button>
         <h3 class="right">
             <i class="fa fa-minus-square timescale_decrease unselectable"></i>
-            <span class="emphasis-color" style="display: inline-block; width: 22px; text-align: center">{timeScale}</span>
+            <span class="emphasis-color" style="display: inline-block; width: 22px; text-align: center;margin-top:50px;">{timeScale}</span>
             <i class="fa fa-plus-square timescale_increase unselectable"></i>
         </h3>
     </script>
-
+    
     <script type="text/template" id="codestatus-template">
         <h5 class="error" style="display: {errorDisplay}"><i class="fa fa-warning error-color"></i> There is a problem with your code: {errorMessage}</h5>
     </script>
@@ -85,24 +87,41 @@
     <script type="text/plain" id="default-elev-implementation">
         {
             init: function(elevators, floors) {
-                var rotator = 0;
-                _.each(floors, function(floor) {
-                    floor.on("up_button_pressed down_button_pressed", function() {
-                        var elevator = elevators[(rotator++) % elevators.length];
-                        elevator.goToFloor(floor.level);
-                    }); 
-                });
-                _.each(elevators, function(elevator) {
-                    elevator.on("floor_button_pressed", function(floorNum) {
-                        elevator.goToFloor(floorNum);
+                elevators.forEach(function(e) {    
+                    e.isDestination = function(floorNum) {
+                        return e.destinationQueue.indexOf(floorNum) != -1;
+                    }
+        
+                    e.on("floor_button_pressed", function(floorNum) {
+                        if (!e.isDestination(floorNum))
+                            e.goToFloor(floorNum);
                     });
-                    elevator.on("idle", function() {
-                        elevator.goToFloor(0);
+                
+                    e.on("passing_floor", function(floorNum, direction) {
+                        if (e.isDestination(floorNum)) {
+                            e.destinationQueue = e.destinationQueue.filter(function(f) { return f != floorNum; });
+                            e.goToFloor(floorNum, true);
+                        }
+                    });
+                });
+                    
+                floors.forEach(function(f) {
+                    f.on("up_button_pressed down_button_pressed", function() {
+                        if (elevators.some(function(e) { return e.isDestination(f.floorNum()); }))
+                            return;
+                        
+                        var e = elevators[0];
+                        
+                        for(var i = 0; i < elevators.length; i++)
+                            if (elevators[i].destinationQueue.length < e.destinationQueue.length)
+                                e = elevators[i];
+                        
+                        if (!e.isDestination(f.floorNum()))
+                            e.goToFloor(f.floorNum());
                     });
                 });
             },
-            update: function(dt, elevators, floors) {
-            }
+            update: function(dt, elevators, floors) { }
         }
     </script>
   
@@ -111,12 +130,19 @@
 </head>
 <body>
     <div class="container">
-    
-
         <div class="challenge" style="height: 40px">
+
         </div>
 
+        <div class="properties">
+            <h3  style="margin-right:5px ;">Количество этажей </h3>                
+            <input type="text" id="inputFloor" value="10"  size="4">                       
+            <h3  style="margin-right:5px ;margin-left: 5px;">Количество человек</h3>
+            <input type="text" id="inputPeople" value="300" size="4" >
+        </div>
+        <button id="button_app" style="float: right">Запустить</button>
         <div class="world">
+            
             <div class="feedbackcontainer"></div>
             <div class="innerworld">
             </div>
@@ -131,12 +157,15 @@
         </div>
 
         <div class="codestatus" style="display:none"></div>
+        
+        
+        <span id="fitness_message" style="float: right"></span>
+        <div style="clear:both;"></div>
         <div class="code">
             <textarea name="Code" id="code"></textarea>
         </div>
-        <button id="button_apply" style="float: right">Run</button>
-        <span id="fitness_message" style="float: right"></span>
-        <div style="clear:both;"></div>
     </div>
+
+    
 </body>
 </html>

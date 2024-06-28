@@ -122,7 +122,26 @@ $(function() {
 
     var app = riot.observable({});
     
-    
+    $("#button_app").click(function() {
+        var newUserCount = parseInt($("#inputPeople").val());
+        updateChallenge(newUserCount);
+        updateWorldMaxUsers(newUserCount);
+        console.log("New user count applied:", newUserCount);
+        var newFloorCount = parseInt($("#inputFloor").val()); // Lấy giá trị nhập vào từ input
+
+        // Đảm bảo newFloorCount là số nguyên dương và không âm
+        if (!isNaN(newFloorCount) && newFloorCount > 0) {
+            // Lặp qua mảng challenges và cập nhật giá trị floorCount
+            _.each(challenges, function(challenge) {
+                challenge.options.floorCount = newFloorCount;
+            });
+
+            // Bắt đầu lại thử thách hiện tại với giá trị mới của floorCount
+            app.startChallenge(app.currentChallengeIndex, true);
+        } else {
+            alert("Vui lòng nhập vào một số nguyên dương cho số tầng!");
+        }
+    });
 
     app.worldController = createWorldController(1.0 / 60.0);
     app.worldController.on("usercode_error", function(e) {
@@ -149,6 +168,7 @@ $(function() {
             app.world.unWind();
             // TODO: Investigate if memory leaks happen here
         }
+     
         app.currentChallengeIndex = challengeIndex;
         app.world = app.worldCreator.createWorld(challenges[challengeIndex].options);
         window.world = app.world;

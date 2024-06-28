@@ -3,6 +3,7 @@ var asFloor = function(obj, floorLevel, yPosition, errorHandler) {
     var floor = riot.observable(obj);
 
     floor.level = floorLevel;
+    floor.levelplus = floorLevel+1;
     floor.yPosition = yPosition;
     floor.buttonStates = {up: "", down: ""};
 

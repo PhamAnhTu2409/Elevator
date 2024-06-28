@@ -96,7 +96,7 @@
         function renderElevatorButtons(states) {
             // This is a rarely executed inner-inner loop, does not need efficiency
             return _.map(states, function(b, i) {
-                return riot.render(elevatorButtonTempl, {floorNum: i});
+                return riot.render(elevatorButtonTempl, {floorNum: i+1});
             }).join("");
         };
 
@@ -114,7 +114,7 @@
                 setTransformPos(elem_elevator, e.worldX, e.worldY);
             });
             e.on("new_current_floor", function update_current_floor(floor) {
-                elem_floorindicator.textContent = floor;
+                elem_floorindicator.textContent = floor+1;
             });
             e.on("floor_buttons_changed", function update_floor_buttons(states, indexChanged) {
                 $buttons[indexChanged].toggleClass("activated", states[indexChanged]);

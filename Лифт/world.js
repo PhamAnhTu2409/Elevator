@@ -1,6 +1,9 @@
+function updateWorldMaxUsers(newUserCount) {
 
-
-
+    Limit = newUserCount;
+    console.log("Updated world.maxUsers with new value:", Limit);
+}
+var Limit=300;
 var createWorldCreator = function() {
     var creator = {};
 
@@ -42,7 +45,7 @@ var createWorldCreator = function() {
     };
 
     creator.spawnUserRandomly = function(floorCount, floorHeight, floors) {
-        if (world.spawnedUserCount >= world.maxUsers) {
+        if (world.spawnedUserCount >= Limit) {
             return null;  // Không spawn thêm người dùng nếu đã đạt giới hạn
         }
         var user = creator.createRandomUser();
@@ -108,7 +111,7 @@ var createWorldCreator = function() {
                 }
         }
 
-        //Báo cháy 1
+        //Báo cháy1
         if (world.testcase === 4) {
             var currentFloor = _.random(1, floorCount - 1); 
             var destinationFloor = 0;
@@ -139,7 +142,6 @@ var createWorldCreator = function() {
         world.elevatorInterfaces = _.map(world.elevators, function(e) { return asElevatorInterface({}, e, options.floorCount, handleUserCodeError); });
         world.users = [];
         world.spawnedUserCount = 0;
-        world.maxUsers = 200;
         world.transportedCounter = 0;
         world.transportedPerSec = 0.0;
         world.moveCount = 0;
@@ -147,7 +149,7 @@ var createWorldCreator = function() {
         world.maxWaitTime = 0.0;
         world.avgWaitTime = 0.0;
         world.challengeEnded = false;
-        world.testcase = 2;
+        world.testcase = 1;
         // 1 - After 20:30, 50% floor 1, 50% others
         // 2 - Random all
         // 3 - At 8:45, 90% go down

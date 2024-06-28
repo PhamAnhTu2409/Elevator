@@ -10,12 +10,12 @@ html, body {
 body {
     font-family: Oswald, Arial, Helvetica, sans-serif;
 }
-h1, h2, h3, h4, h5 {
+h1, h2, h3, h4, h5,h6 {
     margin-top: 0.4em;
     margin-bottom: 0.3em;
 }
 
-h1, h2, h3, h4, h5, p {
+h1, h2, h3, h4, h5,h6, p {
     color: #555;
 }
 
@@ -171,7 +171,13 @@ button.right {
     padding: 0;
     overflow: hidden;
 }
-
+.properties{
+    width: 900px;
+    height: 45px;
+    margin: 10px 10px 10px 0px;
+    display: flex;
+    flex-direction: row;
+}
 .innerworld {
     position: relative;
     height: 100%;
@@ -221,7 +227,7 @@ button.right {
     padding-top: 20px;
     line-height: 20px;
     text-align: center;
-    background-color: rgba(44,44,44, 0.6);
+    background-color: rgba(44,44,44, 0);
     z-index: 5;
     overflow: hidden;
 }
