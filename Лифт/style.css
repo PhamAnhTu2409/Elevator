@@ -18,6 +18,7 @@ h1, h2, h3, h4, h5,h6 {
 h1, h2, h3, h4, h5,h6, p {
     color: #555;
 }
+input[type='text'] { font-size: 20px; font-family: monospace; }
 
 .emphasis-color {
     color: #F1F2D8;

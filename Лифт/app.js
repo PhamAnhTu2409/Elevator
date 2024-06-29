@@ -127,19 +127,18 @@ $(function() {
         updateChallenge(newUserCount);
         updateWorldMaxUsers(newUserCount);
         console.log("New user count applied:", newUserCount);
-        var newFloorCount = parseInt($("#inputFloor").val()); // Lấy giá trị nhập vào từ input
-
-        // Đảm bảo newFloorCount là số nguyên dương và không âm
-        if (!isNaN(newFloorCount) && newFloorCount > 0) {
-            // Lặp qua mảng challenges và cập nhật giá trị floorCount
+        var newFloorCount = parseInt($("#inputFloor").val()); 
+        var newElevatorCount = parseInt($("#inputLift").val()); 
+        var newSpawnRate = parseInt($("#inputSpawnRate").val()); 
+        if (!isNaN(newFloorCount) && newFloorCount > 1) {
             _.each(challenges, function(challenge) {
                 challenge.options.floorCount = newFloorCount;
+                challenge.options.elevatorCount = newElevatorCount;
+                challenge.options.spawnRate = newSpawnRate/10;
             });
-
-            // Bắt đầu lại thử thách hiện tại với giá trị mới của floorCount
             app.startChallenge(app.currentChallengeIndex, true);
         } else {
-            alert("Vui lòng nhập vào một số nguyên dương cho số tầng!");
+            alert("Input number > 1");
         }
     });
 

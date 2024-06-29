@@ -72,10 +72,10 @@
             <h1>{challenge.condition.description}</h1>
         </div>
         
-        <button class="right startstop unselectable" style="width: 110px ;margin-top:50px;">{startButtonText}</button>
+        <button class="right startstop unselectable" style="width: 110px ;margin-top:27px;">{startButtonText}</button>
         <h3 class="right">
             <i class="fa fa-minus-square timescale_decrease unselectable"></i>
-            <span class="emphasis-color" style="display: inline-block; width: 22px; text-align: center;margin-top:50px;">{timeScale}</span>
+            <span class="emphasis-color" style="display: inline-block; width: 22px; text-align: center;margin-top:20px;">{timeScale}</span>
             <i class="fa fa-plus-square timescale_increase unselectable"></i>
         </h3>
     </script>
@@ -136,11 +136,20 @@
 
         <div class="properties">
             <h3  style="margin-right:5px ;">Количество этажей </h3>                
-            <input type="text" id="inputFloor" value="10"  size="4">                       
+            <input type="text" id="inputFloor" value="10"  size="2">                       
             <h3  style="margin-right:5px ;margin-left: 5px;">Количество человек</h3>
-            <input type="text" id="inputPeople" value="300" size="4" >
+            <input type="text" id="inputPeople" value="300" size="3" >
+            <h3  style="margin-right:5px ;margin-left: 5px;">Количество лифтов</h3>
+            <input type="text" id="inputLift" value="4" size="1" >
+            <h3  style="margin-right:5px ;margin-left: 5px;">Скорость появления</h3>
+            <input type="text" id="inputSpawnRate" value="20" size="2" >
+            
         </div>
-        <button id="button_app" style="float: right">Запустить</button>
+
+        <button id="button_app"style="float:right;">Запустить</button>
+        <div style="margin-top: 0px">
+            <h3>Open the <a href="documentation.html">Help and API documentation</a> page</h3>
+        </div>
         <div class="world">
             
             <div class="feedbackcontainer"></div>
@@ -152,7 +161,7 @@
                 <div style="top: 60px"><span class="key">Перевезены/(Единица времени)</span><span class="value transportedpersec"></span></div>
                 <div style="top: 80px"><span class="key">Среднее время ожидания</span><span class="value avgwaittime"></span></div>
                 <div style="top: 100px"><span class="key">Максимальное время ожидания</span><span class="value maxwaittime"></span></div>
-                <div style="top: 120px"><span class="key" title="Number of floors that have been travelled by elevators">Количество пройденных этажей</span><span class="value movecount"></span></div>
+                <div style="top: 120px"><span class="key">Количество пройденных этажей</span><span class="value movecount"></span></div>
             </div>
         </div>
 
@@ -164,6 +173,7 @@
         <div class="code">
             <textarea name="Code" id="code"></textarea>
         </div>
+        
     </div>
 
     

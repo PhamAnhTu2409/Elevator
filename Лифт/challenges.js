@@ -25,7 +25,7 @@ var requireDemo = function() {
 
 /* jshint laxcomma:true */
 var challenges = [
-     {options: {floorCount: 10  , elevatorCount: 4, spawnRate: 10}, condition: requireUserCountWithinTime(300, 3600)}
+     {options: {floorCount: 10  , elevatorCount: 4, spawnRate: 20}, condition: requireUserCountWithinTime(300, 3600)}
     
 ];
 /* jshint laxcomma:false */
