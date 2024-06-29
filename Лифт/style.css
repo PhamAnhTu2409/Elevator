@@ -54,7 +54,7 @@ dl dd {
 
 
 .container {
-    width: 1220px;
+    width: 1300px;
     margin: 0 auto;
     padding: 20px 0 40px 0;
     background-color: #BFBD9F;
@@ -167,13 +167,14 @@ button.right {
 
 .world {
     position: relative;
-    width: 1220px;
+    width: 1300px;
     background-color: #333;
     padding: 0;
     overflow: hidden;
+
 }
 .properties{
-    width: 900px;
+    width: 1300px;
     height: 45px;
     margin: 10px 10px 10px 0px;
     display: flex;
@@ -182,20 +183,20 @@ button.right {
 .innerworld {
     position: relative;
     height: 100%;
-    width: 938px;
+    width: 850px;
     border-right: 1px solid black;
     border-left: 1px solid black;
     font-family: Arial, Helvetica, sans-serif;
 }
 
 .statscontainer {
-    font: 12px Consolas, Monaco, monospace;
-    line-height: 10px;
+    font-size: 25px ;
+    line-height: 50px;
     color: #999;
     position: absolute;
     top: 0;
     right: 0px;
-    width: 240px;
+    width: 400px;
     height: 200px;
     padding: 20px;
     z-index: 1;
@@ -208,8 +209,8 @@ button.right {
 .statscontainer div, .statscontainer span {
     position: absolute;
     display: block;
-    width: 240px;
-    height: 10px;
+    width: 400px;
+    height: 40px;
 }
 
 .statscontainer .value {
