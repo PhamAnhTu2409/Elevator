@@ -99,7 +99,7 @@
     }
 }
 ```
-## Code 3
+## LOOK Score
 ```javascript
 {
     init: function(elevators, floors) {
@@ -275,92 +275,96 @@
 ```javascript
 {
     init: function(elevators, floors) {
-        var top = floors.length - 1;
-        var floor_pushup_list = [];
-        var floor_pushdown_list = [];
-        // tool
-        Array.prototype.remove = function(val) { 
-            var index = this.indexOf(val); 
-            if (index > -1) { 
-                this.splice(index, 1); 
-            } 
-        };
-        // log
-        var mode = "0";
-        function myalert(msg) {
-            if (mode == "1") {
-                window.alert(msg);
-            }
-        };
+        var minimal_load = 0;
+        var up_queue = [];
+        var down_queue = [];
 
-        // elevator
-        for (i=0;i< elevators.length; i++) {
-            let j =i;
-            // Whenever the elevators[j] is idle (has no more queued destinations) ...
-            elevators[j].on("idle", function() {
-                // let's go to all the floors (or did we forget one?)
+        elevators.forEach(function(elevator) {
+            elevator.on("idle", function() {
+                // By default, do nothing.
+                var floor = elevator.currentFloor();
 
-                if (elevators[j].currentFloor() == 0)
-                    elevators[j].goToFloor(top);
-                else if (elevators[j].currentFloor() == top)
-                    elevators[j].goToFloor(0);
-            });        
-            elevators[j].on("passing_floor", function(floorNum, direction) {
-                var stop=false;
-                if (elevators[j].loadFactor() < 0.7 &&
-                    ((direction=="up" && floor_pushup_list.includes(floorNum)) ||
-                    (direction=="down" && floor_pushdown_list.includes(floorNum)))) {
-                    stop = true;
+                if ( down_queue.length > 0 ) {
+                    floor = down_queue.pop();
+                } else if ( up_queue.length > 0 ) {
+                    floor = up_queue.pop();
                 }
-                if(stop || elevators[j].getPressedFloors().includes(floorNum)) {
-                    elevators[j].goToFloor(floorNum,true);
-                    if (elevators[j].destinationQueue[1] > floorNum) {
-                        elevators[j].goingUpIndicator(true);
-                        elevators[j].goingDownIndicator(false);
+
+                elevator.goToFloor(floor);
+            });
+
+            elevator.on("floor_button_pressed", function(floorNum) {
+                elevator.goToFloor(floorNum);
+            });
+
+
+            elevator.on("stopped_at_floor", function(floorNum) {
+                if ( elevator.loadFactor() < minimal_load ) {
+                    elevator.goToFloor(floorNum, true);
+                }
+            });
+
+            elevator.on("passing_floor", function(floorNum, direction) {
+                var queue = elevator.destinationQueue;
+
+                // Can we stop at this floor?
+                if ( !isFull(elevator) ) {
+                    var up = up_queue.indexOf(floorNum);
+                    var down = down_queue.indexOf(floorNum);
+
+                    // if we're going up and they're going up...
+                    if ( direction == "up" && up > -1 ) {
+                        up_queue.splice(up, 1);
+                        queue.push(floorNum);
+                    } else if ( direction == "down" && down > -1 ) {
+                        down_queue.splice(down, 1);
+                        queue.push(floorNum)
+                    }
+                }
+
+                // De-dupe
+                queue = _.uniq(queue);
+
+                // Sort it. Floors in same direction first, nearest first.
+                queue.sort(function(left, right) {
+                    // If either of these are the floor we're "passing", that wins.
+                    if ( left == floorNum && right != floorNum ) return -1;
+                    if ( left != floorNum && right == floorNum ) return 1;
+
+                    if ( direction == "down" ) {
+                        if ( left < floorNum && right < floorNum ) return left - right;
+                        if ( left > floorNum && right > floorNum ) return left - right;
+                        if ( left < floorNum && right > floorNum ) return -1;
+                        if ( left > floorNum && right < floorNum ) return 1;
                     } else {
-                        elevators[j].goingUpIndicator(false);
-                        elevators[j].goingDownIndicator(true);
+                        if ( left < floorNum && right < floorNum ) return left - right;
+                        if ( left > floorNum && right > floorNum ) return left - right;
+                        if ( left < floorNum && right > floorNum ) return 1;
+                        if ( left > floorNum && right < floorNum ) return -1;
                     }
-                    if(direction=="up") {
-                        floor_pushup_list.remove(floorNum);
-                    }
-                    if(direction=="down") {
-                        floor_pushdown_list.remove(floorNum);
-                    }
-                }
-            });
-            elevators[j].on("stopped_at_floor", function(floorNum) {
-                if (floorNum == 0) {
-                    elevators[j].goingUpIndicator(true);
-                    elevators[j].goingDownIndicator(false);  
-                } else if (floorNum == top) {
-                    elevators[j].goingUpIndicator(false);
-                    elevators[j].goingDownIndicator(true);  
-                }
-            })
 
-            elevators[j].on("floor_button_pressed", function(floorNum) {
-                // Maybe tell the elevators[j] to go to that floor?
-            });
-        }
+                    // fallthrough -- equal.
+                    return 0;
+                });
 
-        // floor
-        for (i=0;i< floors.length; i++) {
-            let j = i;
-            floors[j].on("up_button_pressed", function (){
-                // Maybe tell an elevators[j] to go to this floor?
-                //wmyalert(j+"th floor push up");
-                if (!floor_pushup_list.includes(j))
-                    floor_pushup_list.push(j);
+                // Let's push it back in
+                elevator.destinationQueue = queue;
+                elevator.checkDestinationQueue();
+            });
+        });
 
+
+        floors.forEach(function(floor) {
+            floor.on("up_button_pressed", function() {
+                up_queue.push(floor.floorNum());
             });
-            floors[j].on("down_button_pressed ", function() {
-                // Maybe tell an elevators[j] to go to this floor?
-                //myalert(j+"th floor push down");
-                if (!floor_pushdown_list.includes(j))
-                    floor_pushdown_list.push(j);
+
+            floor.on("down_button_pressed", function() {
+                down_queue.push(floor.floorNum());
             });
-        }
+        });
+
+        var isFull = function(elevator) { return elevator.loadFactor() >= 0.7; };
 
     },
     update: function(dt, elevators, floors) {
@@ -368,7 +372,4 @@
     }
 }
 ```
-## Code 5 
-```
 
-```

@@ -215,7 +215,7 @@ Elevator.prototype.isOnAFloor = function() {
 
 Elevator.prototype.getLoadFactor = function() {
     var load = _.reduce(this.userSlots, function(sum, slot) { return sum + (slot.user ? slot.user.weight : 0); }, 0);
-    return load / (this.maxUsers * 100);
+    return load / (this.maxUsers * 70);
 };
 
 Elevator.prototype.isFull = function() {

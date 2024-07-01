@@ -88,10 +88,10 @@ var createWorldCreator = function() {
         //8h45 - 90% đi xuống
         if (world.testcase === 3) {
             var currentFloor;
-            if (_.random(1, true) <= 0.1) {
+            if (_.random(1, true) < 0.1) {
                 currentFloor = _.random(1) === 0 ? 0 : _.random(2); // 10%  
             } else {
-                if(_.random(1, true) <= 0.3) {
+                if(_.random(1, true) < 0.2) {
                     currentFloor = _.random(12, floorCount - 1); // 30% 
                 } else {
                     currentFloor = _.random(3,11); // 60%
